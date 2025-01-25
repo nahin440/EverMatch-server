@@ -2,7 +2,7 @@ const express = require('express');
 const app = express();
 require('dotenv').config()
 const cors = require('cors');
-const port = process.env.PORT || 5000 ;
+const port = process.env.PORT || 5000;
 
 // middleware
 
@@ -54,11 +54,11 @@ async function run() {
 
 
 
-    
 
-    app.get("/biodata", async (req,res) => {
-        const result = await biodataCollection.find().toArray();
-        res.send(result);
+
+    app.get("/biodata", async (req, res) => {
+      const result = await biodataCollection.find().toArray();
+      res.send(result);
     })
 
 
@@ -67,6 +67,79 @@ async function run() {
 
 
 
+
+    // Add or Edit Biodata
+
+
+    app.post('/biodata', async (req, res) => {
+      const biodata = req.body;
+
+      try {
+
+        const lastBiodata = await biodataCollection.findOne({}, { sort: { IndexId: -1 } });
+        const newIndexId = lastBiodata ? lastBiodata.IndexId + 1 : 1;
+
+
+        if (biodata._id) {
+          const filter = { _id: new ObjectId(biodata._id) };
+          const updateDoc = {
+            $set: {
+              IndexId: biodata.IndexId || newIndexId,
+              BiodataType: biodata.BiodataType,
+              Name: biodata.Name,
+              ProfileImage: biodata.ProfileImage,
+              DateOfBirth: biodata.DateOfBirth,
+              Height: biodata.Height,
+              Weight: biodata.Weight,
+              Age: biodata.Age,
+              Occupation: biodata.Occupation,
+              Race: biodata.Race,
+              FathersName: biodata.FathersName,
+              MothersName: biodata.MothersName,
+              PermanentDivision: biodata.PermanentDivision,
+              PresentDivision: biodata.PresentDivision,
+              ExpectedPartnerAge: biodata.ExpectedPartnerAge,
+              ExpectedPartnerHeight: biodata.ExpectedPartnerHeight,
+              ExpectedPartnerWeight: biodata.ExpectedPartnerWeight,
+              ContactEmail: biodata.ContactEmail,
+              MobileNumber: biodata.MobileNumber
+            }
+          };
+
+          const result = await biodataCollection.updateOne(filter, updateDoc);
+          res.send({ success: true, message: 'Biodata updated successfully', result });
+        } else {
+          // Otherwise, it's a create operation
+          const newBiodata = {
+            IndexId: newIndexId,
+            BiodataType: biodata.BiodataType,
+            Name: biodata.Name,
+            ProfileImage: biodata.ProfileImage,
+            DateOfBirth: biodata.DateOfBirth,
+            Height: biodata.Height,
+            Weight: biodata.Weight,
+            Age: biodata.Age,
+            Occupation: biodata.Occupation,
+            Race: biodata.Race,
+            FathersName: biodata.FathersName,
+            MothersName: biodata.MothersName,
+            PermanentDivision: biodata.PermanentDivision,
+            PresentDivision: biodata.PresentDivision,
+            ExpectedPartnerAge: biodata.ExpectedPartnerAge,
+            ExpectedPartnerHeight: biodata.ExpectedPartnerHeight,
+            ExpectedPartnerWeight: biodata.ExpectedPartnerWeight,
+            ContactEmail: biodata.ContactEmail,
+            MobileNumber: biodata.MobileNumber
+          };
+
+          const result = await biodataCollection.insertOne(newBiodata);
+          res.send({ success: true, message: 'Biodata created successfully', result });
+        }
+      } catch (error) {
+        console.error('Error creating or updating biodata:', error);
+        res.status(500).send({ success: false, message: 'Failed to process biodata', error });
+      }
+    });
 
 
 
@@ -84,7 +157,7 @@ async function run() {
 
     // favourite collections
 
-    app.post('/favourites', async (req,res) => {
+    app.post('/favourites', async (req, res) => {
       const favouriteBiodata = req.body;
       const result = await favouriteCollection.insertOne(favouriteBiodata);
       res.send(result);
@@ -113,8 +186,8 @@ async function run() {
         res.status(500).send({ message: 'Failed to delete favourite', error });
       }
     });
-    
-    
+
+
 
 
 
@@ -146,10 +219,10 @@ run().catch(console.dir);
 
 
 
-app.get('/', (req,res) => {
-    res.send('wedding season is coming')
+app.get('/', (req, res) => {
+  res.send('wedding season is coming')
 })
 
-app.listen(port, ()=> {
-    console.log(`wedding is going on port ${port}`)
+app.listen(port, () => {
+  console.log(`wedding is going on port ${port}`)
 })
